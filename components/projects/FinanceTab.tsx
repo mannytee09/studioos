@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, Plus, FileDown, Trash2, Receipt, TrendingUp, FileText, CircleAlert as AlertCircle, ChevronDown, Check, SeparatorHorizontal } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Search, Plus, FileDown, Trash2, Receipt, TrendingUp, FileText, CircleAlert as AlertCircle, ChevronDown, Check, Eye, X, Printer, SeparatorHorizontal } from 'lucide-react';
 import { Project, Invoice, InvoiceLineItem, formatBudget } from '@/lib/projects-data';
 import { useCrm } from '@/lib/crm-context';
-import { SidePanel, useCoordinatedClose } from '@/components/ui/SidePanel';
+import { SidePanel } from '@/components/ui/SidePanel';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { InvoicePreview, InvoicePreviewData } from '@/components/projects/InvoicePreview';
 
@@ -22,6 +23,14 @@ const statusBadgeColors: Record<string, string> = {
   Overdue: 'bg-red-50 text-red-700 border border-red-200',
   Issued: 'bg-blue-50 text-blue-700 border border-blue-200',
   Draft: 'bg-gray-100 text-gray-600 border border-gray-200',
+};
+
+const statusDotColors: Record<string, string> = {
+  Paid: 'bg-green-500',
+  Unpaid: 'bg-amber-500',
+  Overdue: 'bg-red-500',
+  Issued: 'bg-blue-500',
+  Draft: 'bg-gray-400',
 };
 
 interface LineItem { id: string; description: string; hours: string; rate: string; isPageBreak?: boolean; }
@@ -103,27 +112,28 @@ function StatusCellDropdown({ value, onChange }: { value: Invoice['status']; onC
       <button
         ref={btnRef}
         onClick={handleToggle}
-        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium transition-colors hover:opacity-80"
-        style={statusBadgeColors[value] ? undefined : undefined}
+        className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full font-medium transition-colors hover:opacity-80 ${statusBadgeColors[value] || 'bg-muted text-muted-foreground'}`}
       >
-        <span className={`px-2 py-0.5 rounded-full ${statusBadgeColors[value] || 'bg-muted text-muted-foreground'}`}>{value}</span>
-        <ChevronDown size={12} className="text-muted-foreground" />
+        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDotColors[value] || 'bg-muted-foreground/40'}`} />
+        {value}
+        <ChevronDown size={11} className="text-muted-foreground" />
       </button>
       {open && rect && (
         <>
           <div className="fixed inset-0 z-[70]" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
           <div
-            className="fixed z-[71] bg-popover border border-border rounded-xl shadow-lg py-1 overflow-hidden min-w-32"
+            className="fixed z-[71] bg-popover border border-border rounded-xl shadow-lg py-1 overflow-hidden w-44"
             style={{ top: rect.bottom + 4, left: rect.left }}
           >
             {(['Draft', 'Issued', 'Paid', 'Unpaid', 'Overdue'] as Invoice['status'][]).map(s => (
               <button
                 key={s}
                 onClick={(e) => { e.stopPropagation(); onChange(s); setOpen(false); }}
-                className="flex items-center justify-between w-full px-4 py-2 text-sm text-left hover:bg-muted transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-left hover:bg-muted transition-colors whitespace-nowrap"
               >
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDotColors[s] || 'bg-muted-foreground/40'}`} />
                 <span className={value === s ? 'text-foreground font-medium' : 'text-muted-foreground'}>{s}</span>
-                {value === s && <Check size={14} />}
+                {value === s && <Check size={12} className="ml-auto" />}
               </button>
             ))}
           </div>
@@ -325,7 +335,7 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">Bill To *</label>
+            <label className="block text-xs text-muted-foreground mb-1.5">Bill To *</label>
             <ClientDropdown value={clientName} onChange={handleClientSelect} clients={clients} />
             <div className="mt-2 space-y-2">
               <input value={clientAddress1} onChange={e => setClientAddress1(e.target.value)} placeholder="Address Line 1" className="modal-input" />
@@ -335,7 +345,7 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
           </div>
         </div>
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-foreground mb-1.5">Company Information</label>
+          <label className="block text-xs text-muted-foreground mb-1.5">Company Information</label>
           <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Company name" className="modal-input" />
           <input value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} placeholder="Address" className="modal-input" />
           <input value={companySuburb} onChange={e => setCompanySuburb(e.target.value)} placeholder="Suburb State Postcode, Australia" className="modal-input" />
@@ -344,7 +354,7 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-foreground mb-1.5">Payment Information</label>
+          <label className="block text-xs text-muted-foreground mb-1.5">Payment Information</label>
           <input value={accountHolder} onChange={e => setAccountHolder(e.target.value)} placeholder="Account Holder" className="modal-input" />
           <div className="grid grid-cols-2 gap-2">
             <input value={bsb} onChange={e => setBsb(e.target.value)} placeholder="BSB" className="modal-input" />
@@ -354,18 +364,18 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
           <input value={bicSwift} onChange={e => setBicSwift(e.target.value)} placeholder="BIC/SWIFT Code" className="modal-input" />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">ABN</label>
+          <label className="block text-xs text-muted-foreground mb-1.5">ABN</label>
           <input value={abn} onChange={e => setAbn(e.target.value)} placeholder="12 345 678 910" className="modal-input" />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">Reference Description</label>
+          <label className="block text-xs text-muted-foreground mb-1.5">Reference Description</label>
           <input value={referenceDesc} onChange={e => setReferenceDesc(e.target.value)} placeholder="Reference Description" className="modal-input" />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">Due Date</label>
+          <label className="block text-xs text-muted-foreground mb-1.5">Due Date</label>
           <div className="flex items-center gap-2 mb-2">
             <input type="checkbox" id="on-receipt" checked={dueOnReceipt} onChange={e => setDueOnReceipt(e.target.checked)} className="rounded" />
             <label htmlFor="on-receipt" className="text-sm text-muted-foreground">Upon Receipt</label>
@@ -377,7 +387,7 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-foreground mb-2">Line Items</label>
+        <label className="block text-xs text-muted-foreground mb-2">Line Items</label>
         <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -467,7 +477,7 @@ function InvoiceFormFields(props: InvoiceFormFieldsProps) {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-foreground mb-1.5">Notes</label>
+        <label className="block text-xs text-muted-foreground mb-1.5">Notes</label>
         <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional notes..." rows={3} className="modal-input resize-none" />
       </div>
     </div>
@@ -517,6 +527,87 @@ function parseSavedAddress(addr: string): [string, string, string] {
   return [addr, '', ''];
 }
 
+// ── Full-screen Invoice Preview Modal (Xero-style, StudioOS styling) ─────────
+function InvoicePreviewModal({ previewData, onClose }: { previewData: InvoicePreviewData; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    if (!mounted) return;
+    const r = requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
+    return () => cancelAnimationFrame(r);
+  }, [mounted]);
+
+  const handleClose = useCallback(() => {
+    setVisible(false);
+    setTimeout(onClose, 250);
+  }, [onClose]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [handleClose]);
+
+  const handleDownload = () => setTimeout(() => window.print(), 200);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-6 print:hidden transition-opacity ease-in-out"
+      style={{
+        background: 'rgba(220,218,212,0.75)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        opacity: visible ? 1 : 0,
+        transitionDuration: '250ms',
+      }}
+      onClick={handleClose}
+    >
+      <div
+        className="bg-card rounded-2xl shadow-2xl flex flex-col overflow-hidden print:hidden"
+        style={{
+          width: 'min(92vw, 1200px)',
+          height: 'min(88vh, 860px)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0 print:hidden">
+          <h2 className="font-semibold text-base">Invoice Preview</h2>
+          <div className="flex items-center gap-3">
+            <button onClick={handleDownload} className="notion-button">
+              <FileDown size={15} /> Download PDF
+            </button>
+            <button onClick={handleClose} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+              <X size={18} className="text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body — scrollable invoice preview, full A4 size, pages stacked */}
+        <div className="flex-1 min-h-0 modal-scroll overflow-y-auto p-6 print:p-0 print:block">
+          <InvoicePreview data={previewData} fullSize />
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// ── Print-only invoice renderer (off-screen, used for Print PDF button) ────────
+function PrintOnlyInvoice({ previewData }: { previewData: InvoicePreviewData }) {
+  return (
+    <div className="fixed inset-0 -z-50 opacity-0 pointer-events-none print:opacity-100 print:z-auto print:pointer-events-auto print:fixed">
+      <div className="invoice-page-shell-wrapper print:block">
+        <InvoicePreview data={previewData} />
+      </div>
+    </div>
+  );
+}
+
 // ── Add Invoice Panel (SidePanel + floating preview) ─────────────────────────
 interface AddInvoicePanelProps {
   project: Project;
@@ -557,10 +648,15 @@ function AddInvoicePanel({ project, clients, onClose, onSave }: AddInvoicePanelP
   }), [invoiceNumber, clientName, clientAddress1, clientAddress2, clientAddress3, companyName, companyAddress, companySuburb, abn, accountHolder, bsb, accountNo, bankName, bicSwift, referenceDesc, invoiceDate, dueOnReceipt, dueDate, status, lines, notes, subtotal]);
 
   const canSave = invoiceDate && invoiceNumber && clientName;
+  const [showPreview, setShowPreview] = useState(false);
+  const [closing, setClosing] = useState(false);
 
-  const { closingExtension, closingPanel, handleClose } = useCoordinatedClose(onClose);
+  const handleAnimatedClose = useCallback(() => {
+    setClosing(true);
+    setTimeout(onClose, 350);
+  }, [onClose]);
 
-  const handleExportPDF = () => setTimeout(() => window.print(), 400);
+  const handlePrintPDF = () => setTimeout(() => window.print(), 400);
 
   const combinedAddress = [clientAddress1, clientAddress2, clientAddress3].filter(Boolean).join('\n');
 
@@ -596,38 +692,25 @@ function AddInvoicePanel({ project, clients, onClose, onSave }: AddInvoicePanelP
       <SidePanel
         title="New Invoice"
         subtitle={project.name}
-        onClose={handleClose}
-        closing={closingPanel}
-        closingExtension={closingExtension}
-        width="min(42vw, 640px)"
+        onClose={onClose}
+        closing={closing}
         headerExtra={
           <div className="ml-auto pt-0.5">
             <StatusDropdown value={status} onChange={setStatus} />
           </div>
         }
-        extension={
-          <>
-            <div className="flex items-start justify-between gap-3 px-6 pt-4 pb-3 border-b border-border flex-shrink-0 print:hidden">
-              <div className="min-w-0 pt-0.5">
-                <h2 className="font-semibold text-base leading-none">Live Preview</h2>
-                <p className="text-xs text-muted-foreground mt-1 truncate">{previewData.number || 'Invoice'} · {previewData.clientName || '—'}</p>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 modal-scroll flex items-center justify-center p-6">
-              <InvoicePreview data={previewData} showNavigation />
-            </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-card flex-shrink-0 print:hidden">
-              <span className="text-xs text-muted-foreground">A4 Portrait</span>
-            </div>
-          </>
-        }
         footer={
           <>
-            <button onClick={handleExportPDF} className="notion-button border border-border">
-              <FileDown size={15} /> Export PDF
-            </button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowPreview(true)} className="notion-button border border-border">
+                <Eye size={15} /> Preview
+              </button>
+              <button onClick={handlePrintPDF} className="notion-button border border-border">
+                <Printer size={15} /> Print PDF
+              </button>
+            </div>
             <div className="flex gap-2">
-              <button onClick={handleClose} className="notion-button border border-border">Cancel</button>
+              <button onClick={handleAnimatedClose} className="notion-button border border-border">Cancel</button>
               <button onClick={handleSave} disabled={!canSave} className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                 Create Invoice
               </button>
@@ -661,6 +744,8 @@ function AddInvoicePanel({ project, clients, onClose, onSave }: AddInvoicePanelP
           clients={clients}
         />
       </SidePanel>
+      {showPreview && <InvoicePreviewModal previewData={previewData} onClose={() => setShowPreview(false)} />}
+      <PrintOnlyInvoice previewData={previewData} />
     </>
   );
 }
@@ -724,9 +809,15 @@ function EditInvoicePanel({ invoice, clients, onClose, onSave }: EditInvoicePane
     invoiceDate, dueOnReceipt, dueDate, status, lines, notes, subtotal,
   }), [invoiceNumber, clientName, clientAddress1, clientAddress2, clientAddress3, companyName, companyAddress, companySuburb, abn, accountHolder, bsb, accountNo, bankName, bicSwift, referenceDesc, invoiceDate, dueOnReceipt, dueDate, status, lines, notes, subtotal]);
 
-  const { closingExtension, closingPanel, handleClose } = useCoordinatedClose(onClose);
+  const [showPreview, setShowPreview] = useState(false);
+  const [closing, setClosing] = useState(false);
 
-  const handleExportPDF = () => setTimeout(() => window.print(), 400);
+  const handleAnimatedClose = useCallback(() => {
+    setClosing(true);
+    setTimeout(onClose, 350);
+  }, [onClose]);
+
+  const handlePrintPDF = () => setTimeout(() => window.print(), 400);
 
   const combinedAddress = [clientAddress1, clientAddress2, clientAddress3].filter(Boolean).join('\n');
 
@@ -760,38 +851,25 @@ function EditInvoicePanel({ invoice, clients, onClose, onSave }: EditInvoicePane
       <SidePanel
         title="Edit Invoice"
         subtitle={invoice.number}
-        onClose={handleClose}
-        closing={closingPanel}
-        closingExtension={closingExtension}
-        width="min(42vw, 640px)"
+        onClose={onClose}
+        closing={closing}
         headerExtra={
           <div className="ml-auto pt-0.5">
             <StatusDropdown value={status} onChange={setStatus} />
           </div>
         }
-        extension={
-          <>
-            <div className="flex items-start justify-between gap-3 px-6 pt-4 pb-3 border-b border-border flex-shrink-0 print:hidden">
-              <div className="min-w-0 pt-0.5">
-                <h2 className="font-semibold text-base leading-none">Live Preview</h2>
-                <p className="text-xs text-muted-foreground mt-1 truncate">{previewData.number || 'Invoice'} · {previewData.clientName || '—'}</p>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 modal-scroll flex items-center justify-center p-6">
-              <InvoicePreview data={previewData} showNavigation />
-            </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-card flex-shrink-0 print:hidden">
-              <span className="text-xs text-muted-foreground">A4 Portrait</span>
-            </div>
-          </>
-        }
         footer={
           <>
-            <button onClick={handleExportPDF} className="notion-button border border-border">
-              <FileDown size={15} /> Export PDF
-            </button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowPreview(true)} className="notion-button border border-border">
+                <Eye size={15} /> Preview
+              </button>
+              <button onClick={handlePrintPDF} className="notion-button border border-border">
+                <Printer size={15} /> Print PDF
+              </button>
+            </div>
             <div className="flex gap-2">
-              <button onClick={handleClose} className="notion-button border border-border">Cancel</button>
+              <button onClick={handleAnimatedClose} className="notion-button border border-border">Cancel</button>
               <button onClick={handleSave} className="btn-primary">Save Changes</button>
             </div>
           </>
@@ -823,6 +901,8 @@ function EditInvoicePanel({ invoice, clients, onClose, onSave }: EditInvoicePane
           clients={clients}
         />
       </SidePanel>
+      {showPreview && <InvoicePreviewModal previewData={previewData} onClose={() => setShowPreview(false)} />}
+      <PrintOnlyInvoice previewData={previewData} />
     </>
   );
 }

@@ -179,7 +179,7 @@ export function DatePicker({ value, onChange, placeholder = 'Select date', align
       </button>
 
       {open && (
-        <div className={`absolute mt-1 bg-popover border border-border rounded-xl shadow-lg z-50 p-3 ${align === 'right' ? 'right-0' : 'left-0'}`}>
+        <div className={`absolute mt-1 bg-popover border border-border rounded-xl shadow-lg z-50 p-3 ${align === 'right' ? 'right-0' : 'left-0'}`} style={{ minWidth: '290px' }}>
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <button type="button" onClick={prevMonth} className="p-1 hover:bg-muted rounded-lg">
