@@ -1,0 +1,295 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+@layer base {
+  :root {
+    --background: 22 20% 99%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    --primary: 0 0% 20%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 20%;
+    --radius: 6px;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 0 0% 93%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 58%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 93%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 0 0% 80%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #333333;
+  }
+}
+
+@layer components {
+  /* ── Sidebar ── */
+  .sidebar-item {
+    @apply flex items-center gap-2.5 px-2.5 rounded-lg text-sm transition-colors duration-150;
+    height: 44px;
+  }
+  .sidebar-item-active {
+    @apply text-foreground font-medium;
+  }
+  .sidebar-item-hover:hover {
+    background: rgba(0,0,0,0.04);
+    @apply text-foreground;
+  }
+  .nav-icon { @apply text-muted-foreground; }
+  .nav-label { @apply text-muted-foreground; }
+  .sidebar-item-active .nav-icon,
+  .sidebar-item-active .nav-label { @apply text-foreground; }
+  .sidebar-item-hover:hover .nav-icon,
+  .sidebar-item-hover:hover .nav-label { @apply text-foreground; }
+
+  /* ── Sidebar background ── */
+  .sidebar-bg {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .dark .sidebar-bg {
+    background: rgba(20,20,20,0.6);
+  }
+
+  /* ── Table ── */
+  .table-header {
+    @apply px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+  .table-cell { @apply px-4 py-3 text-sm; }
+
+  /* ── Buttons ── */
+  .notion-button {
+    @apply inline-flex items-center gap-1.5 h-8 px-3 text-sm rounded-lg hover:bg-muted transition-all duration-200 active:scale-[0.97];
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 h-8 px-3 text-sm rounded-lg bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 active:scale-[0.97] font-medium;
+  }
+
+  /* ── Segmented toggle (All/Archived, view toggle) — sliding highlight ── */
+  .seg-toggle {
+    @apply relative inline-flex border border-border rounded-lg overflow-hidden;
+  }
+  .seg-toggle-btn {
+    @apply h-8 px-3 text-sm font-medium transition-colors duration-200 relative z-10;
+  }
+  .seg-toggle-btn-active {
+    @apply bg-foreground text-background;
+  }
+  .seg-toggle-btn-inactive {
+    @apply text-muted-foreground hover:text-foreground hover:bg-muted;
+  }
+
+  /* ── Cards ── */
+  .card-base {
+    @apply bg-card border border-border rounded-xl;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .card-hover {
+    @apply transition-all duration-150;
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .kpi-card {
+    @apply bg-card border border-border rounded-xl p-5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .project-card {
+    @apply bg-card border border-border rounded-xl overflow-hidden cursor-pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.05);
+    @apply transition-all duration-150;
+  }
+  .project-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+    @apply border-muted-foreground/30;
+  }
+
+  /* ── Status dot ── */
+  .status-dot { @apply w-1.5 h-1.5 rounded-full flex-shrink-0; }
+
+  /* ── Form inputs ── */
+  .modal-input {
+    @apply w-full px-3 py-2 bg-muted rounded-lg border border-transparent text-sm outline-none focus:border-border transition-colors;
+  }
+
+  /* ── Scrollbars ── */
+  .modal-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.15) transparent;
+  }
+  .modal-scroll::-webkit-scrollbar { width: 5px; }
+  .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+  .modal-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 3px;
+  }
+  .modal-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,0.25); }
+  .dark .modal-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.15); }
+
+  .dropdown-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: inherit;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.12) transparent;
+  }
+  .dropdown-scroll::-webkit-scrollbar { width: 4px; }
+  .dropdown-scroll::-webkit-scrollbar-track { background: transparent; }
+  .dropdown-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.12);
+    border-radius: 2px;
+  }
+  .dark .dropdown-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.12); }
+
+  /* ── Gantt timeline horizontal scrollbar (thicker for easier grab) ── */
+  .gantt-scroll {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(0,0,0,0.25) transparent;
+  }
+  .gantt-scroll::-webkit-scrollbar { height: 10px; }
+  .gantt-scroll::-webkit-scrollbar-track { background: transparent; }
+  .gantt-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.25);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .gantt-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,0.4); background-clip: content-box; }
+  .dark .gantt-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.25); background-clip: content-box; }
+  .dark .gantt-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.4); background-clip: content-box; }
+
+  /* ── Filter dropdown list item ── */
+  .filter-item {
+    @apply flex items-center justify-between w-full px-3 py-1.5 text-sm rounded-lg transition-colors text-left;
+  }
+  .filter-item-active { @apply font-medium text-foreground bg-white/60; }
+  .filter-item-inactive { @apply text-muted-foreground hover:text-foreground hover:bg-white/40; }
+
+  /* ── Active view toggle (solid fill — matches notifications tabs) ── */
+  .view-toggle-active {
+    @apply bg-foreground text-background font-medium;
+  }
+  .dark .view-toggle-active {
+    @apply bg-foreground text-background;
+  }
+
+  /* ── Toolbar icon button (filter / sort / view) — subtle bg + hover ── */
+  .toolbar-icon-btn {
+    @apply flex items-center justify-center w-8 h-8 border border-border rounded-lg text-muted-foreground transition-colors;
+    background: rgba(255,255,255,0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .toolbar-icon-btn:hover {
+    @apply text-foreground bg-muted/60;
+  }
+  .dark .toolbar-icon-btn {
+    background: rgba(255,255,255,0.04);
+  }
+  .dark .toolbar-icon-btn:hover {
+    background: rgba(255,255,255,0.08);
+  }
+  .toolbar-icon-btn-active {
+    @apply border-foreground/30 text-foreground bg-muted;
+  }
+
+  /* ── Glassmorphism toast notification ── */
+  .glass-toast {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    @apply text-foreground border border-border/50;
+  }
+  .dark .glass-toast {
+    background: rgba(30,30,30,0.75);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  /* ── Theme toggle track ── */
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+}
+
+@media print {
+  body * { visibility: hidden !important; }
+
+  /* Legacy invoice document (used by standalone preview modal) */
+  .invoice-document, .invoice-document * { visibility: visible !important; }
+  .invoice-document {
+    position: absolute !important;
+    left: 0 !important; top: 0 !important;
+    width: 100% !important; max-width: none !important;
+    margin: 0 !important; padding: 0 !important;
+  }
+
+  /* New A4 page preview (InvoiceEditorLayout + InvoicePreview) */
+  .invoice-page-shell, .invoice-page-shell * { visibility: visible !important; }
+  .invoice-page-shell {
+    position: absolute !important;
+    left: 0 !important; top: 0 !important;
+    width: 210mm !important; height: 297mm !important;
+    margin: 0 !important; padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    break-after: page;
+    overflow: hidden !important;
+  }
+  .invoice-page-shell:last-child { break-after: auto; }
+  /* Un-scale the page for print — render at true A4 size */
+  .invoice-page-shell > div {
+    transform: none !important;
+    width: 210mm !important; height: 297mm !important;
+  }
+  .invoice-page-bg {
+    padding: 18mm 16mm !important;
+    min-height: 297mm !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .print\:hidden { display: none !important; }
+  @page { margin: 0; size: A4; }
+}
