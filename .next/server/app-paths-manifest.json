@@ -3,5 +3,6 @@
   "/(app)/projects/page": "app/(app)/projects/page.js",
   "/(app)/products/page": "app/(app)/products/page.js",
   "/(app)/notifications/page": "app/(app)/notifications/page.js",
+  "/(app)/contacts/page": "app/(app)/contacts/page.js",
   "/(app)/projects/[id]/page": "app/(app)/projects/[id]/page.js"
 }
